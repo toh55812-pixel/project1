@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberBoost — Професійний геймінг буст Valorant, CS2, LoL, Dota 2</title>
+  <meta name="description" content="Преміальний буст рангів, калібрування та коучинг у Valorant, CS2, League of Legends, Dota 2. Швидкий старт, стрім у Discord, VPN захист.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <!-- Socket.IO Client -->
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+  <!-- 1. Top Demo Quick Switcher Banner (For testing all 3 roles seamlessly) -->
+  <div class="demo-role-banner">
+    <div class="demo-title-group">
+      <span>⚡ Тестовий режим (Швидке перемикання ролей):</span>
+    </div>
+    <div class="demo-buttons-group">
+      <button class="demo-role-btn active" data-role="client" onclick="switchDemoRole('client')">
+        👤 Клієнт (Alex_Gamer)
+      </button>
+      <button class="demo-role-btn" data-role="booster" onclick="switchDemoRole('booster')">
+        🎮 Бустер (ShadowStriker - Radiant)
+      </button>
+      <button class="demo-role-btn" data-role="admin" onclick="switchDemoRole('admin')">
+        ⚡ Адміністратор (CyberAdmin)
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Main Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand-logo">
+        <span class="brand-icon">⚡</span>
+        <span>CYBER<span class="brand-highlight">BOOST</span></span>
+      </a>
+
+      <nav class="nav-links">
+        <a class="nav-link" href="#calculator" data-i18n="nav_calc">Калькулятор рангів</a>
+        <a class="nav-link" href="#catalog" data-i18n="nav_catalog">Каталог послуг</a>
+        <a class="nav-link" href="#guarantees" data-i18n="nav_guarantee">Гарантії</a>
+        <a class="nav-link" href="#reviews" data-i18n="nav_reviews">Відгуки</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Language Switcher -->
+        <div class="lang-toggle">
+          <button class="lang-btn active" data-lang="ua" onclick="setLanguage('ua')">UA</button>
+          <button class="lang-btn" data-lang="ru" onclick="setLanguage('ru')">RU</button>
+        </div>
+
+        <!-- Push Notification Toggle -->
+        <button class="btn btn-icon-sm" onclick="notify.requestPushPermission()" title="Увімкнути сповіщення">
+          🔔
+        </button>
+
+        <!-- Cart Button -->
+        <button class="nav-cart-btn" onclick="cart.openDrawer()">
+          🛒 <span data-i18n="nav_cart">Кошик</span>
+          <span id="nav-cart-badge" class="cart-badge" style="display: none;">0</span>
+        </button>
+
+        <!-- User Area / Auth -->
+        <div id="nav-user-area">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. Hero Section -->
+  <section class="hero-section">
+    <div class="hero-badge-pill" data-i18n="hero_badge">
+      ⚡ ПРОФЕСІЙНИЙ ГЕЙМІНГ-БУСТ #1 В УКРАЇНІ ТА ЄВРОПІ
+    </div>
+    
+    <h1 class="hero-title">
+      <span data-i18n="hero_title_1">ПІДВИЩУЙ СВІЙ РАНГ</span>
+      <span class="hero-gradient-text" data-i18n="hero_title_2">З ТОП-100 ГРАВЦЯМИ</span>
+    </h1>
+
+    <p class="hero-subtitle" data-i18n="hero_subtitle">
+      Швидкий, безпечний та анонімний буст у Valorant, CS2, League of Legends та Dota 2. Початок через 10 хвилин після замовлення.
+    </p>
+
+    <div class="hero-cta-group">
+      <button class="btn btn-primary btn-lg" onclick="scrollToSection('calculator')" data-i18n="hero_btn_calc">
+        ⚡ Розрахувати буст
+      </button>
+      <button class="btn btn-outline btn-lg" onclick="scrollToSection('catalog')" data-i18n="hero_btn_catalog">
+        Каталог послуг
+      </button>
+      <button class="btn btn-outline-cyan btn-lg" onclick="openLiveChat()">
+        💬 Чат із консультантом
+      </button>
+    </div>
+
+    <!-- Live Stats Bar -->
+    <div class="hero-stats-grid">
+      <div class="hero-stat-card">
+        <div class="stat-val" data-i18n="hero_stat_1_val">14,800+</div>
+        <div class="stat-lbl" data-i18n="hero_stat_1_lbl">Виконаних замовлень</div>
+      </div>
+      <div class="hero-stat-card">
+        <div class="stat-val" data-i18n="hero_stat_2_val">99.4%</div>
+        <div class="stat-lbl" data-i18n="hero_stat_2_lbl">Вінрейт бустерів</div>
+      </div>
+      <div class="hero-stat-card">
+        <div class="stat-val" data-i18n="hero_stat_3_val">10 хв</div>
+        <div class="stat-lbl" data-i18n="hero_stat_3_lbl">Середній час старту</div>
+      </div>
+      <div class="hero-stat-card">
+        <div class="stat-val" data-i18n="hero_stat_4_val">4.98 / 5</div>
+        <div class="stat-lbl" data-i18n="hero_stat_4_lbl">Середня оцінка клієнтів</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Interactive Rank Calculator Section -->
+  <section id="calculator" class="section-wrapper">
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="calc_title">ІНТЕРАКТИВНИЙ КАЛЬКУЛЯТОР РАНГІВ</h2>
+      <p class="section-subtitle" data-i18n="calc_subtitle">
+        Оберіть вашу гру, поточний та бажаний ранг для миттєвого розрахунку ціни та термінів
+      </p>
+    </div>
+
+    <div class="calc-container">
+      <!-- Game Selector Tabs -->
+      <div id="calc-game-tabs" class="calc-game-tabs">
+        <!-- Injected by calculator.js -->
+      </div>
+
+      <!-- Crypto Bonus Banner (From photo) -->
+      <div class="crypto-bonus-banner mb-4">
+        <div class="crypto-bonus-tag">CRYPTO BONUS</div>
+        <div class="crypto-bonus-content">
+          <div class="crypto-bonus-title">Знижка при оплаті криптовалютою 10%</div>
+          <div class="crypto-bonus-desc">Оплачуй замовлення криптовалютою та отримуй додаткову знижку і кешбек.</div>
+        </div>
+        <div class="crypto-bonus-badge">10% OFF</div>
+      </div>
+
+      <!-- Top Dual-Card Grid (Starting Rank vs Target Rank matching exact UI) -->
+      <div class="faceit-calc-top-grid">
+        <!-- Left Starting Rank Card -->
+        <div id="calc-start-card" class="faceit-rank-card">
+          <!-- Injected by calculator.js -->
+        </div>
+
+        <!-- Middle Chevron Divider -->
+        <div class="faceit-chevron-divider">›</div>
+
+        <!-- Right Target Rank Card -->
+        <div id="calc-target-card" class="faceit-rank-card">
+          <!-- Injected by calculator.js -->
+        </div>
+      </div>
+
+      <!-- Bottom Options & Summary Flex Grid -->
+      <div class="calc-bottom-flex">
+        <!-- Extra Add-ons -->
+        <div class="cyber-card">
+          <h3 class="mb-3" data-i18n="calc_extra_options">Додаткові опції бусту</h3>
+          <div class="calc-options-box">
+            <label class="calc-checkbox-label">
+              <input type="checkbox" onchange="toggleCalcOption('queueType', this.checked ? 'duo' : 'solo')" />
+              <span data-i18n="calc_opt_duo">Duo Queue (Грати разом з бустером) (+40%)</span>
+            </label>
+            <label class="calc-checkbox-label">
+              <input type="checkbox" onchange="toggleCalcOption('stream', this.checked)" />
+              <span data-i18n="calc_opt_stream">Приватний стрім у Discord/Twitch (+$5)</span>
+            </label>
+            <label class="calc-checkbox-label">
+              <input type="checkbox" onchange="toggleCalcOption('priority', this.checked)" />
+              <span data-i18n="calc_opt_priority">VIP Express (Пріоритетний старт) (+25%)</span>
+            </label>
+            <label class="calc-checkbox-label">
+              <input type="checkbox" checked onchange="toggleCalcOption('offlineMode', this.checked)" />
+              <span data-i18n="calc_opt_offline">Offline режим у Steam / Riot (Безкоштовно)</span>
+            </label>
+            
+            <div id="calc-agent-picker-container" style="display: none;">
+              <!-- Populated if game has agents / champions -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary & Order CTA -->
+        <div class="cyber-card calc-summary-card">
+          <div>
+            <h3 class="mb-3" data-i18n="calc_summary_title">Підсумок замовлення</h3>
+            
+            <div class="summary-detail-item">
+              <span class="text-muted" data-i18n="calc_summary_time">Орієнтовний час:</span>
+              <strong id="calc-summary-time" class="text-cyan">3 - 5 год.</strong>
+            </div>
+
+            <div class="summary-detail-item">
+              <span class="text-muted">Захист VPN:</span>
+              <strong class="text-success">Включено ✓</strong>
+            </div>
+
+            <div class="summary-detail-item">
+              <span class="text-muted">Гарантія вінрейту:</span>
+              <strong class="text-cyan">85%+</strong>
+            </div>
+
+            <div class="my-3">
+              <div class="text-xs text-muted" data-i18n="calc_summary_price">Сума до сплати:</div>
+              <div class="summary-price-row">
+                <div id="calc-summary-usd" class="summary-price-usd">$0</div>
+                <div id="calc-summary-uah" class="summary-price-uah">0 ₴</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex flex-column gap-2">
+            <button class="btn btn-primary btn-lg" onclick="orderCalculatorBoost()" data-i18n="calc_btn_order">
+              ⚡ Замовити буст зараз
+            </button>
+            <button class="btn btn-outline" onclick="addCalculatorBoostToCart()" data-i18n="calc_btn_add_cart">
+              🛒 Додати в кошик
+            </button>
+          </div>
+
+          <!-- Payment Trust Badges -->
+          <div class="payment-trust-bar mt-3 pt-3 border-top">
+            <span class="trust-badge-pill">stripe</span>
+            <span class="trust-badge-pill">VISA</span>
+            <span class="trust-badge-pill">Mastercard</span>
+            <span class="trust-badge-pill">Pay</span>
+            <span class="trust-badge-pill">GPay</span>
+            <span class="trust-badge-pill">Crypto</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Services Catalog Section -->
+  <section id="catalog" class="section-wrapper">
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="catalog_title">КАТАЛОГ ГОТОВИХ ПОСЛУГ</h2>
+      <p class="section-subtitle" data-i18n="catalog_subtitle">
+        Калібрування, пакети перемог, коучинг від про-гравців та індивідуальні завдання
+      </p>
+    </div>
+
+    <!-- Category Filter Buttons -->
+    <div class="catalog-filter-row">
+      <button class="cat-filter-btn active" data-category="all" onclick="filterCatalog('all')" data-i18n="cat_all">Усі послуги</button>
+      <button class="cat-filter-btn" data-category="valorant" onclick="filterCatalog('valorant')" data-i18n="cat_valorant">Valorant</button>
+      <button class="cat-filter-btn" data-category="cs2" onclick="filterCatalog('cs2')" data-i18n="cat_cs2">CS2</button>
+      <button class="cat-filter-btn" data-category="lol" onclick="filterCatalog('lol')" data-i18n="cat_lol">LoL</button>
+      <button class="cat-filter-btn" data-category="dota2" onclick="filterCatalog('dota2')" data-i18n="cat_dota2">Dota 2</button>
+      <button class="cat-filter-btn" data-category="coaching" onclick="filterCatalog('coaching')" data-i18n="cat_coaching">Коучинг</button>
+      <button class="cat-filter-btn" data-category="placement" onclick="filterCatalog('placement')" data-i18n="cat_placement">Калібрування</button>
+    </div>
+
+    <!-- Services Grid -->
+    <div id="catalog-grid" class="catalog-grid">
+      <!-- Populated by catalog.js -->
+    </div>
+  </section>
+
+  <!-- 6. Guarantees & Trust Section -->
+  <section id="guarantees" class="section-wrapper">
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="features_title">ЧОМУ ОБИРАЮТЬ CYBERBOOST?</h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="cyber-card feature-card">
+        <div class="feature-icon-circle">🛡️</div>
+        <h3 class="mb-2" data-i18n="feat_1_title">Повна анонімність та VPN</h3>
+        <p class="text-muted" data-i18n="feat_1_desc">Бустери грають виключно з VPN вашої країни та міста, без відповідей друзям у чаті.</p>
+      </div>
+
+      <div class="cyber-card feature-card">
+        <div class="feature-icon-circle">👑</div>
+        <h3 class="mb-2" data-i18n="feat_2_title">Тільки верифіковані Pro</h3>
+        <p class="text-muted" data-i18n="feat_2_desc">Усі наші виконавці — це гравці Radiant, Faceit 10 (3000+ ELO), Challenger та Immortal топ-100.</p>
+      </div>
+
+      <div class="cyber-card feature-card">
+        <div class="feature-icon-circle">🎥</div>
+        <h3 class="mb-2" data-i18n="feat_3_title">Онлайн-трекінг та стрім</h3>
+        <p class="text-muted" data-i18n="feat_3_desc">Слідкуйте за кожною грою в реальному часі через особистий кабінет та прямий стрім.</p>
+      </div>
+
+      <div class="cyber-card feature-card">
+        <div class="feature-icon-circle">💰</div>
+        <h3 class="mb-2" data-i18n="feat_4_title">100% Гарантія повернення</h3>
+        <p class="text-muted" data-i18n="feat_4_desc">Якщо ви не задоволені результатом або виникнуть непередбачені обставини — повертаємо кошти.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Customer Reviews Section -->
+  <section id="reviews" class="section-wrapper">
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="reviews_title">ВІДГУКИ НАШИХ КЛІЄНТІВ</h2>
+      <p class="section-subtitle" data-i18n="reviews_subtitle">
+        Більше 500 реальних відгуків на Discord та Trustpilot
+      </p>
+    </div>
+
+    <div id="reviews-grid" class="reviews-grid">
+      <!-- Populated by app.js -->
+    </div>
+  </section>
+
+  <!-- 8. Floating Live Chat Widget Trigger Button -->
+  <button class="floating-chat-trigger" onclick="openLiveChat()">
+    <span class="ping-dot"></span>
+    <span>💬 Онлайн-чат 24/7</span>
+  </button>
+
+  <!-- ---------------- MODALS & DRAWERS ---------------- -->
+
+  <!-- Cart Drawer -->
+  <div id="cart-overlay" class="overlay" onclick="cart.closeDrawer()"></div>
+  <div id="cart-drawer" class="drawer">
+    <div class="drawer-header">
+      <h3 data-i18n="cart_title">Ваш кошик</h3>
+      <button class="close-btn" onclick="cart.closeDrawer()">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <div id="cart-items-list">
+        <!-- Rendered by cart.js -->
+      </div>
+
+      <!-- Promo Code Box -->
+      <div class="mt-4 pt-3 border-top">
+        <label class="form-label text-xs">Маєте промокод?</label>
+        <div class="d-flex gap-2">
+          <input type="text" id="cart-promo-input" class="form-control" placeholder="CYBER2026, UKRAINE" />
+          <button class="btn btn-outline-cyan btn-sm" onclick="cart.applyPromoCode(document.getElementById('cart-promo-input').value)">
+            Застосувати
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <div id="cart-discount-row" class="d-flex justify-content-between text-xs text-success mb-2" style="display: none;">
+        <span>Знижка:</span>
+        <strong id="cart-discount-val">-0%</strong>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted" data-i18n="cart_total">Разом:</span>
+        <div class="text-end">
+          <div id="cart-total-usd" class="fw-bold" style="font-size: 1.4rem;">$0</div>
+          <div id="cart-total-uah" class="text-xs text-muted">0 ₴</div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-lg w-100" style="width: 100%;" onclick="cart.checkoutCart()" data-i18n="cart_btn_checkout">
+        Перейти до оформлення
+      </button>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="modal">
+    <div class="modal-backdrop" onclick="closeCheckoutModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 data-i18n="checkout_title">Оформлення замовлення</h3>
+        <button class="close-btn" onclick="closeCheckoutModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="submitCheckoutOrder(event)">
+          <!-- Summary Header -->
+          <div class="cyber-box mb-4">
+            <div class="text-xs text-muted">Послуга:</div>
+            <h4 id="checkout-summary-title" class="my-1 text-cyan">-</h4>
+            <div class="d-flex justify-content-between align-items-baseline mt-2">
+              <span class="text-muted">Сума до сплати:</span>
+              <div>
+                <strong id="checkout-summary-price" class="text-success" style="font-size: 1.3rem;">$0</strong>
+                <small id="checkout-summary-uah" class="text-muted">(0 ₴)</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Credentials -->
+          <h4 class="mb-3" data-i18n="checkout_acc_info">Дані акаунту (безпечно через SSL)</h4>
+          <div class="mb-3">
+            <label class="form-label" data-i18n="checkout_srv_lbl">Сервер / Регіон:</label>
+            <input type="text" id="checkout-server" class="form-control" value="EU West / Europe" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" data-i18n="checkout_login_lbl">Riot ID / Steam / BattleTag / Логін:</label>
+            <input type="text" id="checkout-login" class="form-control" placeholder="Player#EUW або Steam Profile" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" data-i18n="checkout_discord_lbl">Ваш Discord / Telegram для зв’язку:</label>
+            <input type="text" id="checkout-discord" class="form-control" placeholder="Username#0000" required />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" data-i18n="checkout_notes_lbl">Побажання / Графік гри:</label>
+            <textarea id="checkout-notes" class="form-control" rows="2" placeholder="Напр. грати тільки вдень, без чату в грі..."></textarea>
+          </div>
+
+          <!-- Payment Methods -->
+          <h4 class="mb-3" data-i18n="checkout_pay_method">Спосіб оплати:</h4>
+          <div class="d-flex flex-column gap-2 mb-4">
+            <label class="calc-checkbox-label">
+              <input type="radio" name="payment_method" value="card" checked />
+              <span data-i18n="checkout_pay_card">💳 Банківська картка (Visa / Mastercard)</span>
+            </label>
+            <label class="calc-checkbox-label">
+              <input type="radio" name="payment_method" value="monobank" />
+              <span data-i18n="checkout_pay_mono">🐱 Monobank / Privat24</span>
+            </label>
+            <label class="calc-checkbox-label">
+              <input type="radio" name="payment_method" value="crypto" />
+              <span data-i18n="checkout_pay_crypto">💎 Криптовалюта (USDT TRC20, BTC, TON)</span>
+            </label>
+            <label class="calc-checkbox-label">
+              <input type="radio" name="payment_method" value="apple_pay" />
+              <span data-i18n="checkout_pay_apple"> Apple Pay / Google Pay</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-100" style="width: 100%;" data-i18n="checkout_btn_submit">
+            🔒 Підтвердити та оплатити
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Chat Drawer (Real-time Socket.IO) -->
+  <div id="chat-overlay" class="overlay" onclick="closeLiveChat()"></div>
+  <div id="chat-drawer" class="drawer">
+    <div class="drawer-header">
+      <div>
+        <h4 id="chat-header-title">Онлайн-консультація 24/7</h4>
+        <small id="chat-header-sub" class="text-muted">Підтримка та бустери на зв'язку</small>
+      </div>
+      <button class="close-btn" onclick="closeLiveChat()">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <div id="chat-messages-container" class="chat-messages-container">
+        <!-- Rendered by chat.js -->
+      </div>
+      <div id="chat-typing-indicator" class="text-xs text-cyan mt-1" style="display: none;"></div>
+    </div>
+
+    <div class="drawer-footer">
+      <form onsubmit="handleSendMessage(event)" class="chat-input-row">
+        <input type="text" id="chat-input-text" class="form-control" placeholder="Напишіть повідомлення..." onkeypress="handleChatInputKeypress(event)" data-i18n-ph="chat_ph" autocomplete="off" />
+        <button type="submit" class="btn btn-primary btn-sm">Надіслати</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Tracker & Details Modal -->
+  <div id="tracker-modal" class="modal">
+    <div class="modal-backdrop" onclick="closeOrderTrackerModal()"></div>
+    <div class="modal-content modal-content-lg">
+      <div class="modal-header">
+        <h3 data-i18n="tracker_title">МОЇ ЗАМОВЛЕННЯ ТА ТРЕКЕР</h3>
+        <button class="close-btn" onclick="closeOrderTrackerModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="tracker-layout-grid">
+          <div id="tracker-orders-list" class="tracker-sidebar">
+            <!-- Left sidebar with order cards -->
+          </div>
+          <div id="tracker-order-details">
+            <!-- Right side order timeline & progress -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard Modal -->
+  <div id="admin-dashboard-modal" class="modal">
+    <div class="modal-backdrop" onclick="closeAdminDashboard()"></div>
+    <div class="modal-content modal-content-lg">
+      <div class="modal-header">
+        <h3 data-i18n="admin_title">⚡ Адмін-панель керування CyberBoost</h3>
+        <button class="close-btn" onclick="closeAdminDashboard()">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Admin Nav Tabs -->
+        <div class="d-flex gap-2 mb-4">
+          <button class="btn btn-outline-cyan btn-sm admin-tab-btn active" data-tab="orders" onclick="switchAdminTab('orders')">📦 Замовлення</button>
+          <button class="btn btn-outline-cyan btn-sm admin-tab-btn" data-tab="services" onclick="switchAdminTab('services')">➕ Додати послугу</button>
+          <button class="btn btn-outline-cyan btn-sm admin-tab-btn" data-tab="users" onclick="switchAdminTab('users')">👥 Користувачі та бустери</button>
+        </div>
+
+        <!-- Tab 1: Orders -->
+        <div id="admin-tab-orders" class="admin-tab-content">
+          <!-- Stats Cards -->
+          <div class="hero-stats-grid mb-4">
+            <div class="hero-stat-card">
+              <div id="admin-stat-revenue" class="stat-val">$0</div>
+              <div class="stat-lbl">Загальний дохід</div>
+            </div>
+            <div class="hero-stat-card">
+              <div id="admin-stat-active" class="stat-val">0</div>
+              <div class="stat-lbl">Активних замовлень</div>
+            </div>
+            <div class="hero-stat-card">
+              <div id="admin-stat-completed" class="stat-val">0</div>
+              <div class="stat-lbl">Виконаних замовлень</div>
+            </div>
+            <div class="hero-stat-card">
+              <div id="admin-stat-boosters" class="stat-val">0</div>
+              <div class="stat-lbl">Бустерів у системі</div>
+            </div>
+          </div>
+
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Послуга</th>
+                <th>Клієнт</th>
+                <th>Сума</th>
+                <th>Статус</th>
+                <th>Бустер</th>
+                <th>Дії</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-tbody">
+              <!-- Rendered by dashboard.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tab 2: Add Service -->
+        <div id="admin-tab-services" class="admin-tab-content" style="display: none;">
+          <form id="form-add-service" onsubmit="submitCreateNewService(event)" class="cyber-box p-4">
+            <h4 class="mb-3">Створити нову послугу або тайтл у каталозі</h4>
+            <div class="mb-3">
+              <label class="form-label">Назва послуги:</label>
+              <input type="text" id="new-srv-title" class="form-control" placeholder="Напр: Apex Legends 20 Kill Badge" required />
+            </div>
+            <div class="d-flex gap-3 mb-3">
+              <div class="flex-grow-1">
+                <label class="form-label">Гра / Тайтл:</label>
+                <select id="new-srv-game" class="form-select">
+                  <option value="valorant">Valorant</option>
+                  <option value="cs2">Counter-Strike 2</option>
+                  <option value="lol">League of Legends</option>
+                  <option value="dota2">Dota 2</option>
+                  <option value="other">Інша гра (Custom)</option>
+                </select>
+              </div>
+              <div class="flex-grow-1">
+                <label class="form-label">Категорія:</label>
+                <select id="new-srv-category" class="form-select">
+                  <option value="placement">Калібрування</option>
+                  <option value="wins">Перемоги</option>
+                  <option value="coaching">Коучинг</option>
+                  <option value="custom">Кастомний буст</option>
+                </select>
+              </div>
+            </div>
+            <div class="d-flex gap-3 mb-3">
+              <div class="flex-grow-1">
+                <label class="form-label">Ціна (USD):</label>
+                <input type="number" id="new-srv-price" class="form-control" placeholder="25" required />
+              </div>
+              <div class="flex-grow-1">
+                <label class="form-label">Термін виконання:</label>
+                <input type="text" id="new-srv-delivery" class="form-control" placeholder="1-2 дні" />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Опис:</label>
+              <textarea id="new-srv-desc" class="form-control" rows="2" placeholder="Детальний опис того, що входить у вартість..."></textarea>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Особливості (через кому):</label>
+              <input type="text" id="new-srv-features" class="form-control" placeholder="VPN захист, Стрім, Solo/Duo" />
+            </div>
+            <button type="submit" class="btn btn-primary">➕ Додати в каталог</button>
+          </form>
+        </div>
+
+        <!-- Tab 3: Users -->
+        <div id="admin-tab-users" class="admin-tab-content" style="display: none;">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th>Користувач</th>
+                <th>Email</th>
+                <th>Роль</th>
+                <th>Замовлень</th>
+                <th>Рейтинг</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-tbody">
+              <!-- Rendered by dashboard.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booster Dashboard Modal -->
+  <div id="booster-dashboard-modal" class="modal">
+    <div class="modal-backdrop" onclick="closeBoosterDashboard()"></div>
+    <div class="modal-content modal-content-lg">
+      <div class="modal-header">
+        <h3 data-i18n="booster_title">Кабінет бустера CyberBoost</h3>
+        <button class="close-btn" onclick="closeBoosterDashboard()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex gap-2 mb-4">
+          <button class="btn btn-outline-cyan btn-sm booster-tab-btn active" data-tab="available" onclick="switchBoosterTab('available')" data-i18n="booster_tab_available">Доступні замовлення</button>
+          <button class="btn btn-outline-cyan btn-sm booster-tab-btn" data-tab="my" onclick="switchBoosterTab('my')" data-i18n="booster_tab_my">Мої активні замовлення</button>
+        </div>
+
+        <div id="booster-tab-available" class="booster-tab-content">
+          <div id="booster-available-list" class="catalog-grid">
+            <!-- Available orders pool -->
+          </div>
+        </div>
+
+        <div id="booster-tab-my" class="booster-tab-content" style="display: none;">
+          <div id="booster-my-list" class="catalog-grid">
+            <!-- Booster's active orders -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Booster Modal (for Admin) -->
+  <div id="assign-booster-modal" class="modal">
+    <div class="modal-backdrop" onclick="closeAssignBoosterModal()"></div>
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h4>Призначити бустера</h4>
+        <button class="close-btn" onclick="closeAssignBoosterModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Оберіть виконавця:</label>
+        <select id="assign-booster-select" class="form-select mb-4">
+          <!-- Populated by dashboard.js -->
+        </select>
+        <button class="btn btn-primary w-100" style="width: 100%;" onclick="submitAssignBooster()">
+          ⚡ Підтвердити призначення
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal (Login / Register) -->
+  <div id="auth-modal" class="modal">
+    <div class="modal-backdrop" onclick="closeAuthModal()"></div>
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-header">
+        <h4 id="auth-modal-title">Вхід в акаунт</h4>
+        <button class="close-btn" onclick="closeAuthModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleAuthFormSubmit(event)">
+          <div class="mb-3">
+            <label class="form-label">Email:</label>
+            <input type="email" id="auth-email" class="form-control" placeholder="alex@gmail.com" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Пароль:</label>
+            <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required />
+          </div>
+
+          <div id="auth-register-fields" style="display: none;">
+            <div class="mb-3">
+              <label class="form-label">Ваш нікнейм:</label>
+              <input type="text" id="auth-name" class="form-control" placeholder="Alex_Gamer" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Discord / Контакт:</label>
+              <input type="text" id="auth-discord" class="form-control" placeholder="Alex#1234" />
+            </div>
+          </div>
+
+          <button type="submit" id="auth-submit-btn" class="btn btn-primary w-100 mb-3" style="width: 100%;">
+            Увійти
+          </button>
+
+          <div id="auth-switch-text" class="text-center text-xs text-muted">
+            <!-- Switch between login/register text -->
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Toast Notification Stack Container -->
+  <div id="toast-container"></div>
+
+  <!-- Client-side Scripts -->
+  <script src="/js/i18n.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/calculator.js"></script>
+  <script src="/js/catalog.js"></script>
+  <script src="/js/cart.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

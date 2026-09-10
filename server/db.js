@@ -1,0 +1,581 @@
+const fs = require('fs');
+const path = require('path');
+const bcrypt = require('bcryptjs');
+
+const DB_FILE = path.join(__dirname, 'data.json');
+
+// Default Seed Data
+const createInitialData = () => {
+  const salt = bcrypt.genSaltSync(10);
+
+  const users = [
+    {
+      id: 'usr_admin',
+      email: 'admin@boost.gg',
+      passwordHash: bcrypt.hashSync('admin123', salt),
+      name: 'CyberAdmin',
+      role: 'admin',
+      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
+      createdAt: new Date(Date.now() - 30 * 86400000).toISOString()
+    },
+    {
+      id: 'usr_booster_1',
+      email: 'booster@boost.gg',
+      passwordHash: bcrypt.hashSync('booster123', salt),
+      name: 'ShadowStriker',
+      role: 'booster',
+      rating: 4.98,
+      completedOrders: 142,
+      rankTitle: 'Radiant / Global Elite / Challenger',
+      games: ['valorant', 'cs2', 'lol'],
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      createdAt: new Date(Date.now() - 20 * 86400000).toISOString()
+    },
+    {
+      id: 'usr_booster_2',
+      email: 'booster2@boost.gg',
+      passwordHash: bcrypt.hashSync('booster123', salt),
+      name: 'VortexGod',
+      role: 'booster',
+      rating: 4.94,
+      completedOrders: 89,
+      rankTitle: 'Immortal Top 100 / Faceit 10 (3100 ELO)',
+      games: ['dota2', 'cs2'],
+      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
+      createdAt: new Date(Date.now() - 15 * 86400000).toISOString()
+    },
+    {
+      id: 'usr_client',
+      email: 'client@boost.gg',
+      passwordHash: bcrypt.hashSync('client123', salt),
+      name: 'Alex_Gamer',
+      role: 'client',
+      discord: 'AlexGamer#7721',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      createdAt: new Date(Date.now() - 5 * 86400000).toISOString()
+    }
+  ];
+
+  const games = [
+    {
+      id: 'cs2_faceit',
+      name: 'CS2 (Faceit ELO)',
+      tag: 'FACEIT 1-10',
+      icon: '⚡',
+      badgeColor: '#ff5500',
+      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&auto=format&fit=crop&q=80',
+      description: 'Faceit Level 1-10 буст ELO від гравців 3000+ ELO',
+      isEloBased: true,
+      eloStep: 25,
+      ranks: [
+        { id: 'lvl_1', name: 'Level 1', value: 1, basePrice: 4, minElo: 1, maxElo: 500, defaultElo: 400, color: '#94a3b8', strokePercent: 10 },
+        { id: 'lvl_2', name: 'Level 2', value: 2, basePrice: 5, minElo: 501, maxElo: 750, defaultElo: 600, color: '#22c55e', strokePercent: 25 },
+        { id: 'lvl_3', name: 'Level 3', value: 3, basePrice: 6, minElo: 751, maxElo: 900, defaultElo: 800, color: '#22c55e', strokePercent: 40 },
+        { id: 'lvl_4', name: 'Level 4', value: 4, basePrice: 8, minElo: 901, maxElo: 1050, defaultElo: 975, color: '#eab308', strokePercent: 55 },
+        { id: 'lvl_5', name: 'Level 5', value: 5, basePrice: 10, minElo: 1051, maxElo: 1200, defaultElo: 1055, color: '#eab308', strokePercent: 70 },
+        { id: 'lvl_6', name: 'Level 6', value: 6, basePrice: 12, minElo: 1201, maxElo: 1350, defaultElo: 1275, color: '#eab308', strokePercent: 85 },
+        { id: 'lvl_7', name: 'Level 7', value: 7, basePrice: 15, minElo: 1351, maxElo: 1530, defaultElo: 1375, color: '#f59e0b', strokePercent: 95 },
+        { id: 'lvl_8', name: 'Level 8', value: 8, basePrice: 20, minElo: 1531, maxElo: 1750, defaultElo: 1600, color: '#f97316', strokePercent: 100 },
+        { id: 'lvl_9', name: 'Level 9', value: 9, basePrice: 26, minElo: 1751, maxElo: 2000, defaultElo: 1850, color: '#ea580c', strokePercent: 100 },
+        { id: 'lvl_10', name: 'Level 10', value: 10, basePrice: 38, minElo: 2001, maxElo: 3500, defaultElo: 2100, color: '#ef4444', strokePercent: 100 }
+      ]
+    },
+    {
+      id: 'valorant',
+      name: 'Valorant',
+      tag: 'FPS',
+      icon: '🎯',
+      badgeColor: '#ff4655',
+      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&auto=format&fit=crop&q=80',
+      description: 'Ранговий буст, калібрування та перемоги від Radiant гравців',
+      isEloBased: true,
+      eloStep: 25,
+      ranks: [
+        { id: 'iron_1', name: 'Iron I', tier: 'iron', sub: 'I', value: 1, basePrice: 4, color: '#94a3b8', minElo: 0, maxElo: 100, defaultElo: 50 },
+        { id: 'iron_2', name: 'Iron II', tier: 'iron', sub: 'II', value: 2, basePrice: 4.5, color: '#94a3b8', minElo: 100, maxElo: 200, defaultElo: 150 },
+        { id: 'iron_3', name: 'Iron III', tier: 'iron', sub: 'III', value: 3, basePrice: 5, color: '#94a3b8', minElo: 200, maxElo: 300, defaultElo: 250 },
+        { id: 'bronze_1', name: 'Bronze I', tier: 'bronze', sub: 'I', value: 4, basePrice: 6, color: '#d97706', minElo: 300, maxElo: 400, defaultElo: 350 },
+        { id: 'bronze_2', name: 'Bronze II', tier: 'bronze', sub: 'II', value: 5, basePrice: 7, color: '#d97706', minElo: 400, maxElo: 500, defaultElo: 450 },
+        { id: 'bronze_3', name: 'Bronze III', tier: 'bronze', sub: 'III', value: 6, basePrice: 8, color: '#d97706', minElo: 500, maxElo: 600, defaultElo: 550 },
+        { id: 'silver_1', name: 'Silver I', tier: 'silver', sub: 'I', value: 7, basePrice: 9.5, color: '#cbd5e1', minElo: 600, maxElo: 700, defaultElo: 650 },
+        { id: 'silver_2', name: 'Silver II', tier: 'silver', sub: 'II', value: 8, basePrice: 11, color: '#cbd5e1', minElo: 700, maxElo: 800, defaultElo: 750 },
+        { id: 'silver_3', name: 'Silver III', tier: 'silver', sub: 'III', value: 9, basePrice: 13, color: '#cbd5e1', minElo: 800, maxElo: 900, defaultElo: 850 },
+        { id: 'gold_1', name: 'Gold I', tier: 'gold', sub: 'I', value: 10, basePrice: 15, color: '#eab308', minElo: 900, maxElo: 1000, defaultElo: 950 },
+        { id: 'gold_2', name: 'Gold II', tier: 'gold', sub: 'II', value: 11, basePrice: 18, color: '#eab308', minElo: 1000, maxElo: 1100, defaultElo: 1050 },
+        { id: 'gold_3', name: 'Gold III', tier: 'gold', sub: 'III', value: 12, basePrice: 22, color: '#eab308', minElo: 1100, maxElo: 1200, defaultElo: 1150 },
+        { id: 'platinum_1', name: 'Platinum I', tier: 'platinum', sub: 'I', value: 13, basePrice: 26, color: '#06b6d4', minElo: 1200, maxElo: 1300, defaultElo: 1250 },
+        { id: 'platinum_2', name: 'Platinum II', tier: 'platinum', sub: 'II', value: 14, basePrice: 30, color: '#06b6d4', minElo: 1300, maxElo: 1400, defaultElo: 1350 },
+        { id: 'platinum_3', name: 'Platinum III', tier: 'platinum', sub: 'III', value: 15, basePrice: 36, color: '#06b6d4', minElo: 1400, maxElo: 1500, defaultElo: 1450 },
+        { id: 'diamond_1', name: 'Diamond I', tier: 'diamond', sub: 'I', value: 16, basePrice: 42, color: '#a855f7', minElo: 1500, maxElo: 1600, defaultElo: 1550 },
+        { id: 'diamond_2', name: 'Diamond II', tier: 'diamond', sub: 'II', value: 17, basePrice: 50, color: '#a855f7', minElo: 1600, maxElo: 1700, defaultElo: 1650 },
+        { id: 'diamond_3', name: 'Diamond III', tier: 'diamond', sub: 'III', value: 18, basePrice: 60, color: '#a855f7', minElo: 1700, maxElo: 1800, defaultElo: 1750 },
+        { id: 'ascendant_1', name: 'Ascendant I', tier: 'ascendant', sub: 'I', value: 19, basePrice: 72, color: '#10b981', minElo: 1800, maxElo: 1900, defaultElo: 1850 },
+        { id: 'ascendant_2', name: 'Ascendant II', tier: 'ascendant', sub: 'II', value: 20, basePrice: 88, color: '#10b981', minElo: 1900, maxElo: 2000, defaultElo: 1950 },
+        { id: 'ascendant_3', name: 'Ascendant III', tier: 'ascendant', sub: 'III', value: 21, basePrice: 105, color: '#10b981', minElo: 2000, maxElo: 2100, defaultElo: 2050 },
+        { id: 'immortal_1', name: 'Immortal I', tier: 'immortal', sub: 'I', value: 22, basePrice: 130, color: '#f43f5e', minElo: 2100, maxElo: 2200, defaultElo: 2150 },
+        { id: 'immortal_2', name: 'Immortal II', tier: 'immortal', sub: 'II', value: 23, basePrice: 170, color: '#f43f5e', minElo: 2200, maxElo: 2300, defaultElo: 2250 },
+        { id: 'immortal_3', name: 'Immortal III', tier: 'immortal', sub: 'III', value: 24, basePrice: 230, color: '#f43f5e', minElo: 2300, maxElo: 2400, defaultElo: 2350 },
+        { id: 'radiant', name: 'Radiant', tier: 'radiant', sub: '★', value: 25, basePrice: 340, color: '#fbbf24', minElo: 2400, maxElo: 3000, defaultElo: 2500 }
+      ],
+      agents: ['Jett', 'Reyna', 'Omen', 'Sova', 'Viper', 'Killjoy', 'Cypher', 'Clove', 'Iso', 'Fade', 'Any']
+    },
+    {
+      id: 'dota2',
+      name: 'Dota 2',
+      tag: 'MMR / РАНГИ',
+      icon: '🛡️',
+      badgeColor: '#e23636',
+      image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
+      description: 'Буст MMR та рангів від Рекрута до Титана (Immortal)',
+      isEloBased: true,
+      eloStep: 50,
+      ranks: [
+        { id: 'herald_1', name: 'Рекрут 1', tier: 'herald', stars: 1, value: 1, basePrice: 4, color: '#84cc16', defaultElo: 150 },
+        { id: 'herald_2', name: 'Рекрут 2', tier: 'herald', stars: 2, value: 2, basePrice: 4.5, color: '#84cc16', defaultElo: 300 },
+        { id: 'herald_3', name: 'Рекрут 3', tier: 'herald', stars: 3, value: 3, basePrice: 5, color: '#84cc16', defaultElo: 450 },
+        { id: 'herald_4', name: 'Рекрут 4', tier: 'herald', stars: 4, value: 4, basePrice: 5.5, color: '#84cc16', defaultElo: 600 },
+        { id: 'herald_5', name: 'Рекрут 5', tier: 'herald', stars: 5, value: 5, basePrice: 6, color: '#84cc16', defaultElo: 750 },
+
+        { id: 'guardian_1', name: 'Вартовий 1', tier: 'guardian', stars: 1, value: 6, basePrice: 7, color: '#94a3b8', defaultElo: 900 },
+        { id: 'guardian_2', name: 'Вартовий 2', tier: 'guardian', stars: 2, value: 7, basePrice: 7.5, color: '#94a3b8', defaultElo: 1050 },
+        { id: 'guardian_3', name: 'Вартовий 3', tier: 'guardian', stars: 3, value: 8, basePrice: 8, color: '#94a3b8', defaultElo: 1200 },
+        { id: 'guardian_4', name: 'Вартовий 4', tier: 'guardian', stars: 4, value: 9, basePrice: 8.5, color: '#94a3b8', defaultElo: 1350 },
+        { id: 'guardian_5', name: 'Вартовий 5', tier: 'guardian', stars: 5, value: 10, basePrice: 9, color: '#94a3b8', defaultElo: 1500 },
+
+        { id: 'crusader_1', name: 'Лицар 1', tier: 'crusader', stars: 1, value: 11, basePrice: 10, color: '#b45309', defaultElo: 1650 },
+        { id: 'crusader_2', name: 'Лицар 2', tier: 'crusader', stars: 2, value: 12, basePrice: 11, color: '#b45309', defaultElo: 1800 },
+        { id: 'crusader_3', name: 'Лицар 3', tier: 'crusader', stars: 3, value: 13, basePrice: 12, color: '#b45309', defaultElo: 1950 },
+        { id: 'crusader_4', name: 'Лицар 4', tier: 'crusader', stars: 4, value: 14, basePrice: 13, color: '#b45309', defaultElo: 2100 },
+        { id: 'crusader_5', name: 'Лицар 5', tier: 'crusader', stars: 5, value: 15, basePrice: 14, color: '#b45309', defaultElo: 2250 },
+
+        { id: 'archon_1', name: 'Архонт 1', tier: 'archon', stars: 1, value: 16, basePrice: 15, color: '#38bdf8', defaultElo: 2400 },
+        { id: 'archon_2', name: 'Архонт 2', tier: 'archon', stars: 2, value: 17, basePrice: 16, color: '#38bdf8', defaultElo: 2550 },
+        { id: 'archon_3', name: 'Архонт 3', tier: 'archon', stars: 3, value: 18, basePrice: 17, color: '#38bdf8', defaultElo: 2700 },
+        { id: 'archon_4', name: 'Архонт 4', tier: 'archon', stars: 4, value: 19, basePrice: 18, color: '#38bdf8', defaultElo: 2850 },
+        { id: 'archon_5', name: 'Архонт 5', tier: 'archon', stars: 5, value: 20, basePrice: 19, color: '#38bdf8', defaultElo: 3000 },
+
+        { id: 'legend_1', name: 'Легенда 1', tier: 'legend', stars: 1, value: 21, basePrice: 21, color: '#fbbf24', defaultElo: 3150 },
+        { id: 'legend_2', name: 'Легенда 2', tier: 'legend', stars: 2, value: 22, basePrice: 23, color: '#fbbf24', defaultElo: 3300 },
+        { id: 'legend_3', name: 'Легенда 3', tier: 'legend', stars: 3, value: 23, basePrice: 25, color: '#fbbf24', defaultElo: 3450 },
+        { id: 'legend_4', name: 'Легенда 4', tier: 'legend', stars: 4, value: 24, basePrice: 27, color: '#fbbf24', defaultElo: 3600 },
+        { id: 'legend_5', name: 'Легенда 5', tier: 'legend', stars: 5, value: 25, basePrice: 29, color: '#fbbf24', defaultElo: 3750 },
+
+        { id: 'ancient_1', name: 'Володар 1', tier: 'ancient', stars: 1, value: 26, basePrice: 32, color: '#c084fc', defaultElo: 3900 },
+        { id: 'ancient_2', name: 'Володар 2', tier: 'ancient', stars: 2, value: 27, basePrice: 35, color: '#c084fc', defaultElo: 4050 },
+        { id: 'ancient_3', name: 'Володар 3', tier: 'ancient', stars: 3, value: 28, basePrice: 38, color: '#c084fc', defaultElo: 4200 },
+        { id: 'ancient_4', name: 'Володар 4', tier: 'ancient', stars: 4, value: 29, basePrice: 42, color: '#c084fc', defaultElo: 4350 },
+        { id: 'ancient_5', name: 'Володар 5', tier: 'ancient', stars: 5, value: 30, basePrice: 46, color: '#c084fc', defaultElo: 4500 },
+
+        { id: 'divine_1', name: 'Божество 1', tier: 'divine', stars: 1, value: 31, basePrice: 52, color: '#f59e0b', defaultElo: 4700 },
+        { id: 'divine_2', name: 'Божество 2', tier: 'divine', stars: 2, value: 32, basePrice: 58, color: '#f59e0b', defaultElo: 4900 },
+        { id: 'divine_3', name: 'Божество 3', tier: 'divine', stars: 3, value: 33, basePrice: 65, color: '#f59e0b', defaultElo: 5100 },
+        { id: 'divine_4', name: 'Божество 4', tier: 'divine', stars: 4, value: 34, basePrice: 72, color: '#f59e0b', defaultElo: 5300 },
+        { id: 'divine_5', name: 'Божество 5', tier: 'divine', stars: 5, value: 35, basePrice: 80, color: '#f59e0b', defaultElo: 5500 },
+
+        { id: 'immortal', name: 'Титан (Immortal)', tier: 'immortal', stars: 5, value: 36, basePrice: 120, color: '#ef4444', defaultElo: 6000 }
+      ]
+    },
+    {
+      id: 'cs2_premier',
+      name: 'CS2 Premier',
+      tag: 'PREMIER RATING',
+      icon: '💣',
+      badgeColor: '#de9b35',
+      image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&auto=format&fit=crop&q=80',
+      description: 'Premier Rating (ELO 1,000 - 30,000+)',
+      isEloBased: true,
+      eloStep: 250,
+      ranks: [
+        { id: 'prem_5k', name: 'Premier 1,000 - 4,999 ELO', value: 1, basePrice: 6, minElo: 1000, maxElo: 5000, defaultElo: 3000, color: '#94a3b8', icon: '🥉' },
+        { id: 'prem_10k', name: 'Premier 5,000 - 9,999 ELO', value: 2, basePrice: 10, minElo: 5000, maxElo: 10000, defaultElo: 7500, color: '#38bdf8', icon: '🥈' },
+        { id: 'prem_15k', name: 'Premier 10,000 - 14,999 ELO', value: 3, basePrice: 16, minElo: 10000, maxElo: 15000, defaultElo: 12000, color: '#a855f7', icon: '🥇' },
+        { id: 'prem_20k', name: 'Premier 15,000 - 19,999 ELO', value: 4, basePrice: 26, minElo: 15000, maxElo: 20000, defaultElo: 17500, color: '#ec4899', icon: '💎' },
+        { id: 'prem_25k', name: 'Premier 20,000 - 24,999 ELO', value: 5, basePrice: 42, minElo: 20000, maxElo: 25000, defaultElo: 22000, color: '#f59e0b', icon: '💠' },
+        { id: 'prem_30k', name: 'Premier 25,000+ ELO', value: 6, basePrice: 78, minElo: 25000, maxElo: 35000, defaultElo: 26000, color: '#ef4444', icon: '🔥' }
+      ]
+    },
+    {
+      id: 'lol',
+      name: 'League of Legends',
+      tag: 'MOBA',
+      icon: '⚔️',
+      badgeColor: '#c8aa6e',
+      image: 'https://images.unsplash.com/photo-1542751110-97427bbecf20?w=600&auto=format&fit=crop&q=80',
+      description: 'Соло/Дуо буст, перемоги та підняття MMR до Challenger',
+      isEloBased: true,
+      eloStep: 25,
+      ranks: [
+        { id: 'iron', name: 'Iron (Залізо)', value: 1, basePrice: 5, minElo: 0, maxElo: 400, defaultElo: 200, color: '#94a3b8', icon: '🛡️' },
+        { id: 'bronze', name: 'Bronze (Бронза)', value: 2, basePrice: 7, minElo: 400, maxElo: 800, defaultElo: 600, color: '#b45309', icon: '🥉' },
+        { id: 'silver', name: 'Silver (Срібло)', value: 3, basePrice: 11, minElo: 800, maxElo: 1200, defaultElo: 1000, color: '#cbd5e1', icon: '🥈' },
+        { id: 'gold', name: 'Gold (Золото)', value: 4, basePrice: 16, minElo: 1200, maxElo: 1600, defaultElo: 1400, color: '#fbbf24', icon: '🥇' },
+        { id: 'platinum', name: 'Platinum (Платина)', value: 5, basePrice: 24, minElo: 1600, maxElo: 2000, defaultElo: 1800, color: '#38bdf8', icon: '💎' },
+        { id: 'emerald', name: 'Emerald (Смарагд)', value: 6, basePrice: 35, minElo: 2000, maxElo: 2400, defaultElo: 2200, color: '#10b981', icon: '❇️' },
+        { id: 'diamond', name: 'Diamond (Діамант)', value: 7, basePrice: 55, minElo: 2400, maxElo: 2800, defaultElo: 2600, color: '#c084fc', icon: '💠' },
+        { id: 'master', name: 'Master (Майстер)', value: 8, basePrice: 110, minElo: 2800, maxElo: 3200, defaultElo: 3000, color: '#f43f5e', icon: '👑' },
+        { id: 'grandmaster', name: 'Grandmaster (Грандмайстер)', value: 9, basePrice: 190, minElo: 3200, maxElo: 3600, defaultElo: 3400, color: '#ef4444', icon: '🏆' },
+        { id: 'challenger', name: 'Challenger (Претендент)', value: 10, basePrice: 320, minElo: 3600, maxElo: 4500, defaultElo: 3800, color: '#facc15', icon: '🔥' }
+      ],
+      roles: ['Top', 'Jungle', 'Mid', 'ADC', 'Support', 'Any']
+    }
+  ];
+
+  const services = [
+    {
+      id: 'srv_val_calib',
+      gameId: 'valorant',
+      gameName: 'Valorant',
+      title: '5 Placement Matches (Калібрування нового акту)',
+      category: 'placement',
+      price: 24,
+      currency: 'USD',
+      priceUAH: 990,
+      deliveryTime: '2-4 години',
+      badge: 'TOP SELLER',
+      icon: '🎯',
+      description: 'Гарантія 80%+ вінрейту в калібрувальних матчах від Radiant бустера. Максимальний стартовий ранг.',
+      features: ['80%+ Winrate Guarantee', 'Solo / Duo на вибір', 'Стрім у Discord безкоштовно', 'Вибір агентів']
+    },
+    {
+      id: 'srv_cs2_premier',
+      gameId: 'cs2',
+      gameName: 'Counter-Strike 2',
+      title: 'CS2 Premier Win Boost (Пакет 5 Перемог)',
+      category: 'wins',
+      price: 19,
+      currency: 'USD',
+      priceUAH: 790,
+      deliveryTime: '3-6 годин',
+      badge: 'POPULAR',
+      icon: '💣',
+      description: '5 чистих перемог у режимі Premier без читів та стороннього ПЗ. Захист KD та високий ADR.',
+      features: ['Тільки чистий скіл', 'Гра з VPN вашого регіону', 'Duo q можливість', 'Offline режим у Steam']
+    },
+    {
+      id: 'srv_lol_coaching',
+      gameId: 'lol',
+      gameName: 'League of Legends',
+      title: 'Pro Coaching 1-на-1 (2 Години з Challenger)',
+      category: 'coaching',
+      price: 35,
+      currency: 'USD',
+      priceUAH: 1450,
+      deliveryTime: 'У зручний час',
+      badge: 'PRO SKILL',
+      icon: '🎓',
+      description: 'Розбір реплеїв, мікро/макро аналіз, пул чемпіонів, побудова лінійного контролю та практична спільна гра.',
+      features: ['Розбір 2-3 ваших ігор', 'Персональний план тренувань', 'Запис сесії', 'Довічний доступ до чату тренера']
+    },
+    {
+      id: 'srv_dota_lp',
+      gameId: 'dota2',
+      gameName: 'Dota 2',
+      title: 'Low Priority / Behaviour Score Відмив (3 гри)',
+      category: 'other',
+      price: 12,
+      currency: 'USD',
+      priceUAH: 500,
+      deliveryTime: '1-3 години',
+      badge: 'FAST',
+      icon: '🧹',
+      description: 'Швидка перемога в Single Draft без втрати нервів. Підняття порядності акаунту.',
+      features: ['100% перемоги в SD', 'Безпека інвентарю', 'Швидкий старт за 10 хв', 'Без спілкування в чаті гри']
+    },
+    {
+      id: 'srv_val_radiant_duo',
+      gameId: 'valorant',
+      gameName: 'Valorant',
+      title: 'Duo Queue з Про-гравцем (3 години гри разом)',
+      category: 'duo',
+      price: 29,
+      currency: 'USD',
+      priceUAH: 1200,
+      deliveryTime: 'Гнучкий графік',
+      badge: 'NO SHARE',
+      icon: '👥',
+      description: 'Грайте на власному акаунті в паті з топ-бустером. Передавати логін і пароль не потрібно!',
+      features: ['Жодного ризику бану', 'Голосовий зв’язок Discord', 'Підказки під час клатчів', 'Гарантований ап рангу']
+    },
+    {
+      id: 'srv_custom_custom',
+      gameId: 'other',
+      gameName: 'Custom Game / Запит',
+      title: 'Кастомний буст / Інша гра (Apex, OW2, Tarkov, WoW)',
+      category: 'custom',
+      price: 20,
+      currency: 'USD',
+      priceUAH: 820,
+      deliveryTime: 'Індивідуально',
+      badge: 'CUSTOM',
+      icon: '🔮',
+      description: 'Потрібна послуга в іншій грі або специфічне завдання? Оформіть запит або напишіть в чат підтримки.',
+      features: ['Будь-яка гра', 'Індивідуальний підбір майстра', 'Фіксована ціна після оцінки', 'Повний контроль процесу']
+    }
+  ];
+
+  const orders = [
+    {
+      id: 'ORD-7821',
+      clientId: 'usr_client',
+      clientName: 'Alex_Gamer',
+      clientDiscord: 'AlexGamer#7721',
+      boosterId: 'usr_booster_1',
+      boosterName: 'ShadowStriker',
+      gameId: 'valorant',
+      gameName: 'Valorant',
+      serviceType: 'rank_boost',
+      title: 'Valorant Rank Boost: Silver 2 -> Diamond 1',
+      currentRank: 'Silver 2',
+      targetRank: 'Diamond 1',
+      currentRankValue: 8,
+      targetRankValue: 16,
+      progressRank: 'Gold 2',
+      progressRankValue: 11,
+      progressPercent: 42,
+      price: 68,
+      currency: 'USD',
+      priceUAH: 2800,
+      status: 'in_progress', // pending_payment, paid, assigned, in_progress, completed, cancelled
+      paymentStatus: 'verified', // pending, verified, refunded
+      paymentMethod: 'monobank',
+      options: {
+        queueType: 'solo',
+        stream: true,
+        priority: true,
+        preferredAgent: 'Reyna / Jett',
+        offlineMode: true
+      },
+      accountCredentials: {
+        server: 'EU West',
+        login: 'alex_shooter_ua',
+        notes: 'Грати після 18:00 або вдень'
+      },
+      streamUrl: 'https://twitch.tv/sample_stream_demo',
+      createdAt: new Date(Date.now() - 14 * 3600000).toISOString(),
+      updatedAt: new Date().toISOString(),
+      timeline: [
+        { time: new Date(Date.now() - 14 * 3600000).toISOString(), text: 'Замовлення створено клієнтом' },
+        { time: new Date(Date.now() - 13 * 3600000).toISOString(), text: 'Оплату 2800 UAH успішно верифіковано (Monobank)' },
+        { time: new Date(Date.now() - 12 * 3600000).toISOString(), text: 'Призначено бустера ShadowStriker (Radiant)' },
+        { time: new Date(Date.now() - 8 * 3600000).toISOString(), text: 'Бустер розпочав виконання. Поточний ранг піднято до Gold 1' },
+        { time: new Date(Date.now() - 2 * 3600000).toISOString(), text: 'Прогрес: досягнуто Gold 2 (+68 RR). Стрім активний.' }
+      ]
+    },
+    {
+      id: 'ORD-5402',
+      clientId: 'usr_client',
+      clientName: 'Alex_Gamer',
+      clientDiscord: 'AlexGamer#7721',
+      boosterId: null,
+      boosterName: null,
+      gameId: 'cs2',
+      gameName: 'Counter-Strike 2',
+      serviceType: 'catalog_service',
+      title: 'CS2 Premier Win Boost (Пакет 5 Перемог)',
+      currentRank: '11,200 ELO',
+      targetRank: '5 Перемог (+1500 ELO)',
+      progressPercent: 0,
+      price: 19,
+      currency: 'USD',
+      priceUAH: 790,
+      status: 'paid',
+      paymentStatus: 'verified',
+      paymentMethod: 'card',
+      options: {
+        queueType: 'duo',
+        stream: false,
+        priority: false
+      },
+      accountCredentials: {
+        server: 'EU North',
+        login: 'steam_alex_gg',
+        notes: 'Грати в Duo разом по Discord'
+      },
+      createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
+      updatedAt: new Date().toISOString(),
+      timeline: [
+        { time: new Date(Date.now() - 2 * 3600000).toISOString(), text: 'Замовлення створено клієнтом' },
+        { time: new Date(Date.now() - 1.8 * 3600000).toISOString(), text: 'Оплату 790 UAH підтверджено' },
+        { time: new Date(Date.now() - 1.5 * 3600000).toISOString(), text: 'Очікує призначення бустера адміністратором' }
+      ]
+    }
+  ];
+
+  const messages = [
+    {
+      id: 'msg_1',
+      orderId: 'ORD-7821',
+      senderId: 'usr_booster_1',
+      senderName: 'ShadowStriker',
+      senderRole: 'booster',
+      text: 'Привіт, Alex! Я взяв твоє замовлення по Valorant. Зараз заходжу на акаунт з VPN під твій регіон.',
+      timestamp: new Date(Date.now() - 11 * 3600000).toISOString()
+    },
+    {
+      id: 'msg_2',
+      orderId: 'ORD-7821',
+      senderId: 'usr_client',
+      senderName: 'Alex_Gamer',
+      senderRole: 'client',
+      text: 'Привіт! Супер. Будь ласка, якщо буде можливість, зіграй кілька каток на Reyna. І увімкни стрім у Discord або Twitch.',
+      timestamp: new Date(Date.now() - 10 * 3600000).toISOString()
+    },
+    {
+      id: 'msg_3',
+      orderId: 'ORD-7821',
+      senderId: 'usr_booster_1',
+      senderName: 'ShadowStriker',
+      senderRole: 'booster',
+      text: 'Без проблем! Вже взяли Gold 2 з рахунком 13-3 та 13-5. Стрім активний за посиланням у твоїй картці замовлення 🔥',
+      timestamp: new Date(Date.now() - 2 * 3600000).toISOString()
+    },
+    {
+      id: 'msg_general_1',
+      orderId: 'pre_order_consultation',
+      senderId: 'usr_admin',
+      senderName: 'CyberBoost Support',
+      senderRole: 'admin',
+      text: 'Вітаємо в CyberBoost! Маєте запитання щодо термінів, підбору бустера чи знижок? Напишіть нам прямо зараз!',
+      timestamp: new Date(Date.now() - 24 * 3600000).toISOString()
+    }
+  ];
+
+  const promoCodes = [
+    { code: 'CYBER2026', discountPercent: 15, validUntil: '2026-12-31' },
+    { code: 'START', discountPercent: 10, validUntil: '2026-12-31' },
+    { code: 'UKRAINE', discountPercent: 20, validUntil: '2026-12-31' }
+  ];
+
+  const reviews = [
+    {
+      id: 'rev_1',
+      author: 'Max_Sniper',
+      game: 'Valorant',
+      rating: 5,
+      comment: 'Підняли з Gold 1 до Diamond 2 за півтора дні! Стрім працював без лагів, бустер топ 100.',
+      date: '2 дні тому'
+    },
+    {
+      id: 'rev_2',
+      author: 'DotaKing99',
+      game: 'Dota 2',
+      rating: 5,
+      comment: 'Калібрування 5 з 5 перемог! Додали +450 MMR. Дуже приємна підтримка в чаті.',
+      date: '4 дні тому'
+    },
+    {
+      id: 'rev_3',
+      author: 'Vova_CS',
+      game: 'CS2',
+      rating: 5,
+      comment: 'Замовляв Duo буст у Premier. Грали разом, бустер давав чудову інфу та координував. Рекомендую!',
+      date: '1 тиждень тому'
+    }
+  ];
+
+  return { users, games, services, orders, messages, promoCodes, reviews };
+};
+
+// Persistent Database Object
+class Database {
+  constructor() {
+    this.data = null;
+    this.load();
+  }
+
+  load() {
+    try {
+      if (fs.existsSync(DB_FILE)) {
+        const raw = fs.readFileSync(DB_FILE, 'utf8');
+        this.data = JSON.parse(raw);
+      } else {
+        this.data = createInitialData();
+        this.save();
+      }
+    } catch (e) {
+      console.error('Error loading DB file, resetting to initial seed:', e);
+      this.data = createInitialData();
+      this.save();
+    }
+  }
+
+  save() {
+    try {
+      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf8');
+    } catch (e) {
+      console.error('Error saving DB file:', e);
+    }
+  }
+
+  // Helper Finders & Mutations
+  getUsers() { return this.data.users; }
+  getUserById(id) { return this.data.users.find(u => u.id === id); }
+  getUserByEmail(email) { return this.data.users.find(u => u.email.toLowerCase() === email.toLowerCase()); }
+  addUser(user) {
+    this.data.users.push(user);
+    this.save();
+    return user;
+  }
+
+  getGames() { return this.data.games; }
+  getGameById(id) { return this.data.games.find(g => g.id === id); }
+
+  getServices() { return this.data.services; }
+  getServiceById(id) { return this.data.services.find(s => s.id === id); }
+  addService(service) {
+    this.data.services.push(service);
+    this.save();
+    return service;
+  }
+  updateService(id, updates) {
+    const idx = this.data.services.findIndex(s => s.id === id);
+    if (idx !== -1) {
+      this.data.services[idx] = { ...this.data.services[idx], ...updates };
+      this.save();
+      return this.data.services[idx];
+    }
+    return null;
+  }
+  deleteService(id) {
+    this.data.services = this.data.services.filter(s => s.id !== id);
+    this.save();
+  }
+
+  getOrders() { return this.data.orders; }
+  getOrderById(id) { return this.data.orders.find(o => o.id === id); }
+  addOrder(order) {
+    this.data.orders.unshift(order);
+    this.save();
+    return order;
+  }
+  updateOrder(id, updates) {
+    const idx = this.data.orders.findIndex(o => o.id === id);
+    if (idx !== -1) {
+      this.data.orders[idx] = { ...this.data.orders[idx], ...updates, updatedAt: new Date().toISOString() };
+      this.save();
+      return this.data.orders[idx];
+    }
+    return null;
+  }
+
+  getMessages(orderId) {
+    if (!orderId) return this.data.messages;
+    return this.data.messages.filter(m => m.orderId === orderId);
+  }
+  addMessage(message) {
+    this.data.messages.push(message);
+    this.save();
+    return message;
+  }
+
+  getPromoCodes() { return this.data.promoCodes; }
+  getReviews() { return this.data.reviews; }
+  addReview(review) {
+    this.data.reviews.unshift(review);
+    this.save();
+    return review;
+  }
+}
+
+const db = new Database();
+module.exports = db;
